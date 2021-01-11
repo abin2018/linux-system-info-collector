@@ -4,6 +4,7 @@
 BASEDIR=$(cd $(dirname $0) ; pwd)
 HOSTS_FILE=$BASEDIR/hosts
 RESULT_DIR=$BASEDIR/.result
+IGNORE_HOSTS=$BASEDIR/.ignore_hosts
 
 [ -f ${HOSTS_FILE} ] || touch ${HOSTS_FILE}
 [ -d ${RESULT_DIR} ] && rm -rf ${RESULT_DIR}
@@ -18,9 +19,21 @@ HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
 #Step 0: 提前准备好hosts文件以及做好ssh互信
 
 #Step 1: 分发脚本文件
+function distribute_script() {
+    host=$1
+    scp -o ConnectTimeout=3 -r $BASEDIR/scripts $host:/tmp/ &>/dev/null
+    #[ $? -ne 0 ] && { echo "$host connect failed"; ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host); }
+    [ $? -ne 0 ] && { echo "$host connect failed"; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
+}
+
 function distribute_scripts() {
+    echo > ${IGNORE_HOSTS}
     for host in ${ALL_HOSTS} ; do 
-	scp -r $BASEDIR/scripts $host:/tmp/ >/dev/null
+        distribute_script $host &
+    done
+    wait
+    for host in $(cat ${IGNORE_HOSTS}); do
+	ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host)
     done
 }
 
@@ -31,7 +44,7 @@ function clean_all() {
 
 function run_remote_cmd() {
     for host in ${ALL_HOSTS} ; do 
-        ssh $host "$@"
+        ssh -o ConnectTimeout=3 $host "$@"
     done
 }
 
@@ -40,7 +53,7 @@ function call_run_remote_cmd() {
 	result_file=${RESULT_DIR}/$host.result
 	rm -f ${result_file}
 	echo "$host" >> ${result_file}
-        ssh $host "$@" >> ${result_file} &
+        ssh  -o ConnectTimeout=3 $host "$@" >> ${result_file} &
     done
     i=0
     ch=('|' '\' '-' '/')
@@ -64,7 +77,7 @@ function call_iperf3_test() {
 	    ((ALL_HOSTS_ARRAY_INDEX++))
 	fi
 	iperf_host=${ALL_HOSTS_ARRAY[${ALL_HOSTS_ARRAY_INDEX}]}
-        bandwidth=$(ssh $host "bash /tmp/scripts/check_system_info.sh collect_bandwidth ${iperf_host}")
+        bandwidth=$(ssh -o ConnectTimeout=3 $host "bash /tmp/scripts/check_system_info.sh collect_bandwidth ${iperf_host}")
 	echo -e "$host\t-->\t$iperf_host\t$bandwidth"
     done
 }
