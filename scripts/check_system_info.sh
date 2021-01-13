@@ -1,14 +1,15 @@
 #!/bin/bash
-#Date: 2021-01-04
-#Author: DuYanbin
-#Email: duyanbin@lvwan.com
-#Version: 1.0
+# Date: 2021-01-04
+# Author: Eric
+# Email: yanghigh@163.com
+# Version: 1.0
 
 BASEDIR=$(cd $(dirname $0) ; pwd)
 source $BASEDIR/functions.sh
+source $BASEDIR/env.sh
 
 
-#Check Vendor and Product Name
+# Check Vendor and Product Name
 function get_product_info() {
     sys_vendor=$(cat /sys/class/dmi/id/sys_vendor)
     product_name=$(cat /sys/class/dmi/id/product_name)
@@ -18,7 +19,7 @@ function get_product_info() {
 }
 
 
-#Check Server Type
+# Check Server Type
 function get_server_type() {
     virtual_check_result=$(systemd-detect-virt)
     if [[ ${virtual_check_result} == "none" ]] ; then
@@ -31,7 +32,7 @@ function get_server_type() {
 }
 
 
-#Check OS Info
+# Check OS Info
 function get_os_info() {
     os_version=$(awk '{print $4}' /etc/redhat-release | awk -F'.' '{print $1"."$2}')
     os_name=$(awk '{print $1}' /etc/redhat-release)
@@ -39,7 +40,7 @@ function get_os_info() {
 }
 
 
-#Check CPU Info
+# Check CPU Info
 function get_cpu_info() {
     cpu_model_name=$(grep 'model name' /proc/cpuinfo | uniq | awk -F': ' '{print $2}')
     cpu_physical_count=$(grep 'physical id' /proc/cpuinfo | uniq | wc -l)
@@ -49,7 +50,7 @@ function get_cpu_info() {
 }
 
 
-#Check Memory Info
+# Check Memory Info
 function get_memory_info() {
     totalmem=0;
     for mem in /sys/devices/system/memory/memory*; do
@@ -59,9 +60,9 @@ function get_memory_info() {
     echo $(bytes_unit_trans $totalmem)
 }
 
-#Check Disk Info
+# Check Disk Info
 function get_disk_info() {
-    all_disks=$(ls /dev/{sd,vd,xvd}* 2>/dev/null | grep -o -E '(sd|vd|xvd)[a-z]$' | xargs -n 1)
+    all_disks=$(ls /sys/block/ | grep -o -E "${DISK_PATTERN}")
     for disk in ${all_disks} ; do
 	disk_type_tag=$(cat /sys/block/$disk/queue/rotational)
 	disk_sectors=$(cat /sys/block/$disk/size)
@@ -78,7 +79,7 @@ function get_disk_info() {
 }
 
 
-#Check Network
+# Check Network
 function get_net_interface_info() {
     for interface in $(ls /sys/class/net/ | xargs -n 1 | grep -Ev 'lo') ; do 
 	carrier_file=/sys/class/net/$interface/carrier
@@ -91,19 +92,45 @@ function get_net_interface_info() {
     echo
 }
 
+function help() {
+    echo -e "Usage: sh $0 command
+-----------------------------------
+Valid command:
+    get_product_info
+    get_server_type 
+    get_os_info 
+    get_cpu_info 
+    get_memory_info
+    get_net_interface_info
+    get_disk_info
+    get_all"
+}
+
 
 function main() {
     case $1 in 
-	collect_disk_info) 
-		    get_raid_info
+	get_product_info) 
+		    get_product_info
 		    ;;
-	collect_raid_info) 
-		    get_raid_info
+	get_server_type) 
+		    get_server_type
 		    ;;
-	collect_net) 
+	get_os_info) 
+		    get_os_info
+		    ;;
+	get_cpu_info) 
+		    get_cpu_info
+		    ;;
+	get_memory_info) 
+		    get_memory_info
+		    ;;
+	get_net_interface_info) 
 		    get_net_interface_info
 		    ;;
-	collect_all) 
+	get_disk_info) 
+		    get_disk_info
+		    ;;
+	get_all) 
 		    get_product_info
 		    get_server_type
 		    get_os_info
@@ -113,15 +140,14 @@ function main() {
 		    get_disk_info
 		    ;;
 	*) 
-		    echo "Invalid command"
+		    help
     esac
 }
 
-#参数处理
-if [ $# -ne 1 ] ; then
-    echo "Usage: $0 command"
+# Main
+if [ $#  -ne 1 ] ; then
+    help
 else
     cmd=$1
     main $cmd 
 fi
-
