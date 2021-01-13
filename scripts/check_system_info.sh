@@ -18,7 +18,6 @@ function get_product_info() {
     echo ${sys_vendor} ${product_name} ${product_serial} ${product_uuid}
 }
 
-
 # Check Server Type
 function get_server_type() {
     virtual_check_result=$(systemd-detect-virt)
@@ -31,14 +30,12 @@ function get_server_type() {
     fi
 }
 
-
 # Check OS Info
 function get_os_info() {
     os_version=$(awk '{print $4}' /etc/redhat-release | awk -F'.' '{print $1"."$2}')
     os_name=$(awk '{print $1}' /etc/redhat-release)
     echo ${os_name}_${os_version}
 }
-
 
 # Check CPU Info
 function get_cpu_info() {
@@ -49,15 +46,15 @@ function get_cpu_info() {
     echo "${cpu_model_name} ${cpu_physical_count}*${cpu_cores_count}(${cpu_processor_count})"
 }
 
-
 # Check Memory Info
 function get_memory_info() {
-    totalmem=0;
+    total_mem=0;
     for mem in /sys/devices/system/memory/memory*; do
-	[[ "$(cat ${mem}/online)" == "1" ]] \
-	&& totalmem=$((totalmem+$((0x$(cat /sys/devices/system/memory/block_size_bytes)))));
+	if [[ "$(cat ${mem}/online)" == "1" ]] ; then
+	    total_mem=$((totalmem+$((0x$(cat /sys/devices/system/memory/block_size_bytes)))));
+	fi
     done
-    echo $(bytes_unit_trans $totalmem)
+    echo $(bytes_unit_trans $total_mem)
 }
 
 # Check Disk Info
@@ -78,7 +75,6 @@ function get_disk_info() {
     echo
 }
 
-
 # Check Network
 function get_net_interface_info() {
     for interface in $(ls /sys/class/net/ | xargs -n 1 | grep -Ev 'lo') ; do 
@@ -92,7 +88,8 @@ function get_net_interface_info() {
     echo
 }
 
-function help() {
+# Usage function
+function usage() {
     echo -e "Usage: sh $0 command
 -----------------------------------
 Valid command:
@@ -107,6 +104,7 @@ Valid command:
 }
 
 
+# Main function
 function main() {
     case $1 in 
 	get_product_info) 
@@ -140,13 +138,13 @@ function main() {
 		    get_disk_info
 		    ;;
 	*) 
-		    help
+		    usage
     esac
 }
 
 # Main
 if [ $#  -ne 1 ] ; then
-    help
+    usage
 else
     cmd=$1
     main $cmd 
