@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#General Function
+#General Variables
 BASEDIR=$(cd $(dirname $0) ; pwd)
 HOSTS_FILE=$BASEDIR/hosts
 RESULT_DIR=$BASEDIR/.result
@@ -15,10 +15,6 @@ ALL_HOSTS_ARRAY=(${ALL_HOSTS})
 ALL_HOSTS_ARRAY_INDEX=0
 HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
 
-
-#Step 0: 提前准备好hosts文件以及做好ssh互信
-
-#Step 1: 分发脚本文件
 function distribute_script() {
     host=$1
     scp -o ConnectTimeout=3 -r $BASEDIR/scripts $host:/tmp/ &>/dev/null
@@ -35,7 +31,6 @@ function distribute_all_scripts() {
 	ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host)
     done
 }
-
 
 function clean_all() {
     for host in ${ALL_HOSTS} ; do 
