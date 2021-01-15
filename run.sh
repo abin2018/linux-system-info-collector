@@ -22,7 +22,6 @@ HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
 function distribute_script() {
     host=$1
     scp -o ConnectTimeout=3 -r $BASEDIR/scripts $host:/tmp/ &>/dev/null
-    #[ $? -ne 0 ] && { echo "$host connect failed"; ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host); }
     [ $? -ne 0 ] && { echo "$host connect failed"; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
@@ -39,7 +38,7 @@ function distribute_scripts() {
 
 
 function clean_all() {
-    run_remote_cmd 'rm -rf /tmp/finished.tag ; rm -rf /tmp/scripts'
+    run_remote_cmd 'rm -rf /tmp/scripts'
 }
 
 function run_remote_cmd() {
@@ -69,18 +68,6 @@ function call_run_remote_cmd() {
 }
 
 #Step 2: ssh远程执行脚本，获取信息
-function call_iperf3_test() {
-    for host in ${ALL_HOSTS} ; do
-	if ((ALL_HOSTS_ARRAY_INDEX==((${#ALL_HOSTS_ARRAY[@]}-1)))); then
-	    ALL_HOSTS_ARRAY_INDEX=0
-	else
-	    ((ALL_HOSTS_ARRAY_INDEX++))
-	fi
-	iperf_host=${ALL_HOSTS_ARRAY[${ALL_HOSTS_ARRAY_INDEX}]}
-        bandwidth=$(ssh -o ConnectTimeout=3 $host "bash /tmp/scripts/check_system_info.sh collect_bandwidth ${iperf_host}")
-	echo -e "$host\t-->\t$iperf_host\t$bandwidth"
-    done
-}
 
 
 #Step 3: 处理收集到的信息并进行展示
@@ -88,8 +75,4 @@ distribute_scripts
 echo "开始收集主机信息，请稍等 "
 call_run_remote_cmd 'bash /tmp/scripts/check_system_info.sh collect_all'
 python $BASEDIR/process_hosts_info.py
-#echo "开始运行带宽测试..."
-#run_remote_cmd 'bash /tmp/scripts/check_system_info.sh run_iperf3'
-#call_iperf3_test
-#run_remote_cmd 'bash /tmp/scripts/check_system_info.sh kill_iperf3'
 clean_all
