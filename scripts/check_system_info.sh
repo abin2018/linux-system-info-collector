@@ -39,7 +39,7 @@ function get_memory_info() {
     total_mem=0;
     for mem in /sys/devices/system/memory/memory*; do
 	if [[ "$(cat ${mem}/online)" == "1" ]] ; then
-	    total_mem=$((totalmem+$((0x$(cat /sys/devices/system/memory/block_size_bytes)))));
+	    total_mem=$((total_mem+$((0x$(cat /sys/devices/system/memory/block_size_bytes)))));
 	fi
     done
     echo $(bytes_unit_trans $total_mem)
