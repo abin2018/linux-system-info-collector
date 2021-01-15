@@ -25,7 +25,7 @@ function distribute_script() {
     [ $? -ne 0 ] && { echo "$host connect failed"; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
-function distribute_scripts() {
+function distribute_all_scripts() {
     echo > ${IGNORE_HOSTS}
     for host in ${ALL_HOSTS} ; do 
         distribute_script $host &
@@ -38,14 +38,11 @@ function distribute_scripts() {
 
 
 function clean_all() {
-    run_remote_cmd 'rm -rf /tmp/scripts'
-}
-
-function run_remote_cmd() {
     for host in ${ALL_HOSTS} ; do 
-        ssh -o ConnectTimeout=3 $host "$@"
+        ssh  -o ConnectTimeout=3 $host "rm -rf /tmp/scripts"
     done
 }
+
 
 function call_run_remote_cmd() {
     for host in ${ALL_HOSTS} ; do 
@@ -54,25 +51,11 @@ function call_run_remote_cmd() {
 	echo "$host" >> ${result_file}
         ssh  -o ConnectTimeout=3 $host "$@" >> ${result_file} &
     done
-    i=0
-    ch=('|' '\' '-' '/')
-    index=0
-    while ps -ef | grep ssh | grep -q collect_all ; do 
-	printf "%c%c%c%c%c\r" ${ch[$index]} ${ch[$index]} ${ch[$index]} ${ch[$index]} ${ch[$index]}
-	((i++))
-	index=$((i%4))
-	sleep 0.5
-    done
     wait
-    echo
 }
 
-#Step 2: ssh远程执行脚本，获取信息
-
-
-#Step 3: 处理收集到的信息并进行展示
-distribute_scripts
+distribute_all_scripts
 echo "开始收集主机信息，请稍等 "
-call_run_remote_cmd 'bash /tmp/scripts/check_system_info.sh collect_all'
-python $BASEDIR/process_hosts_info.py
+call_run_remote_cmd 'bash /tmp/scripts/check_system_info.sh get_all'
+#python $BASEDIR/process_hosts_info.py
 clean_all
