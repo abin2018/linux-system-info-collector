@@ -3,27 +3,41 @@
 
 function bytes_unit_trans() {
     size=$1
-    if ((size%1024==0)) ; then
-	base=1024
-    else
-	base=1000
-    fi
-    echo "$size $base" | awk '{
-        if ($1 < $2) {
+    echo "$size" | awk '{
+        if ($1 < 1024) {
             print $1
-        } else if ($1 < $2**2) {
-            print $1/($2)"KB"
-        } else if ($1 < $2**3) {
-            print $1/($2**2)"MB"
-        } else if ($1 < $2**4) {
-            print $1/($2**3)"GB"
-        } else if ($1 < $2**5) {
-            print $1/($2**4)"TB"
-        } else if ($1 < $2**6) {
-	    print $1/($2**5)"PB"
-	} else { 
-            print "Too big"    
+        } else if ($1 < 1024**2) {
+            if ($1 % 1024 == 0) {
+                print $1/1024"KB"
+            } else {
+                printf("%%.0fKB\n",$1/1000)
+            }
+        } else if ($1 < 1024**3) {
+            if ($1 % (1024**2) == 0) {
+                print $1/(1024**2)"MB"
+            } else {
+                printf("%.0fMB\n",$1/(1000**2))
+            }
+        } else if ($1 < 1024**4) {
+            if ($1 % (1024**3) == 0) {
+                print $1/(1024**3)"GB"
+            } else {
+                printf("%.0fGB\n",$1/(1000**3))
+            }
+        } else if ($1 < 1024**5) {
+            if ($1 % (1024**4) == 0) {
+                print $1/(1024**4)"TB"
+            } else {
+                printf("%.1fTB\n",$1/(1000**4))
+            }
+        } else if ($1 < 1024**6) {
+            if ($1 % (1024**5) == 0) {
+                print $1/(1024**5)"PB"
+            } else {
+                printf("%.1fPB\n",$1/(1000**5))
+            }
+        } else {
+            print "Too big"
         }
     }'
 }
-
