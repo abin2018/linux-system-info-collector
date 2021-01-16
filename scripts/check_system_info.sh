@@ -14,9 +14,7 @@ source $BASEDIR/extend.sh
 function get_product_info() {
     sys_vendor=$(cat /sys/class/dmi/id/sys_vendor)
     product_name=$(cat /sys/class/dmi/id/product_name)
-    product_serial=$(cat /sys/class/dmi/id/product_serial)
-    product_uuid=$(cat /sys/class/dmi/id/product_uuid)
-    echo ${sys_vendor} ${product_name} ${product_serial} ${product_uuid}
+    echo "${sys_vendor} ${product_name}"
 }
 
 # Check Kernel Info

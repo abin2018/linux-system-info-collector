@@ -16,10 +16,10 @@ function get_dist_by_osrelease() {
 function get_dist_info() {
     if [ -f /etc/redhat-release ] ; then
         get_dist_by_rhrelease
-    elif [ -f /etc/issue ] ; then
-        get_dist_by_issue
     elif [ -f /etc/os-release ] ; then
         get_dist_by_osrelease
+    elif [ -f /etc/issue ] ; then
+        get_dist_by_issue
     else
         echo "Unknown"
     fi
