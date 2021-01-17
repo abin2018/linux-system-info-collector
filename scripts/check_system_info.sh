@@ -27,7 +27,7 @@ function get_kernel_info() {
 function get_cpu_info() {
     cpu_model_name=$(grep 'model name' /proc/cpuinfo | uniq | awk -F': ' '{print $2}' | tr ' ' '_')
     cpu_physical_count=$(grep 'physical id' /proc/cpuinfo | uniq | wc -l)
-    cpu_cores_count=$(grep 'cpu cores' /proc/cpuinfo | awk -F': ' '{print $2}')
+    cpu_cores_count=$(grep 'cpu cores' /proc/cpuinfo | uniq | awk -F': ' '{print $2}')
     cpu_processor_count=$(grep "processor" /proc/cpuinfo | wc -l)
     echo "${cpu_model_name}#${cpu_physical_count}#${cpu_cores_count}#${cpu_processor_count}"
 }
