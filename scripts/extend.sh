@@ -29,11 +29,11 @@ function get_dist_info() {
 function get_server_type() {
     virtual_check_result=$(systemd-detect-virt)
     if [[ ${virtual_check_result} == "none" ]] ; then
-        echo "物理机"
+        echo "Physical"
     elif [[ ${virtual_check_result} == "docker" ]] ; then
         echo "Docker"
     else
-        echo "虚拟机(${virtual_check_result})"
+        echo "Virtual(${virtual_check_result})"
     fi
 }
 
