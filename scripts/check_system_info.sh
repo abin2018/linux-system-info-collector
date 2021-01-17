@@ -116,7 +116,6 @@ function output_json() {
     done
     echo "]"
     arr_element_counter=1
-    disk_info=($(string_splitter $(get_disk_info)))
     echo "}"
 }
 
