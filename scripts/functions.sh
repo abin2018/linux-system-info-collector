@@ -1,6 +1,15 @@
 #!/bin/bash
 # Some functions
 
+function string_splitter() {
+	string=$1
+	delimiter=$2
+	if [ -z "$delimiter" ] ; then
+	    delimiter="#"
+	fi
+	echo $(echo $string | tr $delimiter ' ')
+}
+
 function bytes_unit_trans() {
     size=$1
     echo "$size" | awk '{
