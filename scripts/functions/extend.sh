@@ -39,7 +39,7 @@ function get_server_type() {
 
 # Check Raid Info
 function get_raid_info() {
-    raid_card_info=$(lspci | grep -i 'raid')
+    raid_card_info=$(grep 'scsi' /var/log/dmesg | grep -i 'raid')
     if [ -z "${raid_card_info}" ] ; then
         echo "No raid card found" >&2
         return 1

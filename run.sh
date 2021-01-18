@@ -5,6 +5,7 @@ BASEDIR=$(cd $(dirname $0) ; pwd)
 HOSTS_FILE=$BASEDIR/hosts
 RESULT_DIR=$BASEDIR/.result
 IGNORE_HOSTS=$BASEDIR/.ignore_hosts
+export PATH=$PATH:/usr/sbin
 
 [ -f ${HOSTS_FILE} ] || touch ${HOSTS_FILE}
 [ -d ${RESULT_DIR} ] && rm -rf ${RESULT_DIR}
@@ -41,9 +42,8 @@ function clean_all() {
 
 function call_run_remote_cmd() {
     for host in ${ALL_HOSTS} ; do 
-	result_file=${RESULT_DIR}/$host.result
+	result_file=${RESULT_DIR}/$host.json
 	rm -f ${result_file}
-	echo "$host" >> ${result_file}
         ssh  -o ConnectTimeout=3 $host "$@" >> ${result_file} &
     done
     wait
@@ -51,6 +51,6 @@ function call_run_remote_cmd() {
 
 distribute_all_scripts
 echo "开始收集主机信息，请稍等 "
-call_run_remote_cmd 'bash /tmp/scripts/check_system_info.sh get_all'
-#python $BASEDIR/process_hosts_info.py
+call_run_remote_cmd 'bash /tmp/scripts/run.sh get_json'
+python $BASEDIR/process_hosts_info.py
 clean_all
