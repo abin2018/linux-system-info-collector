@@ -7,6 +7,7 @@ RESULT_DIR=$BASE_DIR/.result
 IGNORE_HOSTS=$BASE_DIR/.ignore_hosts
 OUTPUT_FORMAT="table"
 LOG_DIR=$BASE_DIR/log
+ERROR_LOG=${LOG_DIR}/running.log
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then
