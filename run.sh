@@ -6,6 +6,7 @@ HOSTS_FILE=""
 RESULT_DIR=$BASE_DIR/.result
 IGNORE_HOSTS=$BASE_DIR/.ignore_hosts
 OUTPUT_FORMAT="table"
+LOG_DIR=$BASE_DIR/log
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then
@@ -18,12 +19,14 @@ function prepare() {
     HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
     [ -d ${RESULT_DIR} ] && rm -rf ${RESULT_DIR}
     mkdir ${RESULT_DIR}
+    [ -d ${LOG_DIR} ] && rm -rf ${LOG_DIR}
+    mkdir ${LOG_DIR}
 }
 
 function distribute_script() {
     host=$1
     scp -o ConnectTimeout=3 -r $BASE_DIR/scripts $host:/tmp/ &>/dev/null
-    [ $? -ne 0 ] && { echo "$host connect failed"; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
+    [ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
 function distribute_all_scripts() {
