@@ -39,11 +39,9 @@ function multi_process_running() {
     while ((counter < ${#ALL_HOSTS_ARRAY[@]})); do
         temp_host_list=($(echo ${ALL_HOSTS_ARRAY[@]:$counter:$MAX_PROCESS_COUNT}))
         for host in ${temp_host_list[@]} ; do 
-            echo $host
             ${exec_function} $host &
         done
         wait
-        echo "----------------"
         counter=$((counter+MAX_PROCESS_COUNT))
     done
     for host in $(cat ${IGNORE_HOSTS}); do
