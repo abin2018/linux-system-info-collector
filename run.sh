@@ -8,6 +8,7 @@ IGNORE_HOSTS=$BASE_DIR/.ignore_hosts
 OUTPUT_FORMAT="table"
 LOG_DIR=$BASE_DIR/log
 ERROR_LOG=${LOG_DIR}/running.log
+PYTHON_EXEC=$(which python || which python2 || which python3)  # 设置python解释器
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then
@@ -114,4 +115,4 @@ function main() {
 args_parser "$@"
 prepare
 main
-python $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT}
+$PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT}
