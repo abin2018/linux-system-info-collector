@@ -9,6 +9,7 @@ OUTPUT_FORMAT="table"
 LOG_DIR=$BASE_DIR/log
 ERROR_LOG=${LOG_DIR}/running.log
 PYTHON_EXEC=$(which python || which python2 || which python3)  # 设置python解释器
+MAX_PROCESS_COUNT=5 #分发脚本和采集信息时最大允许同时允许的进程数
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then
@@ -19,6 +20,7 @@ function prepare() {
     ALL_HOSTS_ARRAY=(${ALL_HOSTS})
     ALL_HOSTS_ARRAY_INDEX=0
     HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
+    echo > ${IGNORE_HOSTS}
     [ -d ${RESULT_DIR} ] && rm -rf ${RESULT_DIR}
     mkdir ${RESULT_DIR}
     [ -d ${LOG_DIR} ] && rm -rf ${LOG_DIR}
@@ -31,31 +33,36 @@ function distribute_script() {
     [ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
-function distribute_all_scripts() {
-    echo > ${IGNORE_HOSTS}
-    for host in ${ALL_HOSTS} ; do 
-        distribute_script $host &
+function multi_process_running() {
+    exec_function=$1
+    local counter=0
+    while ((counter < ${#ALL_HOSTS_ARRAY[@]})); do
+        temp_host_list=($(echo ${ALL_HOSTS_ARRAY[@]:$counter:$MAX_PROCESS_COUNT}))
+        for host in ${temp_host_list[@]} ; do 
+            echo $host
+            ${exec_function} $host &
+        done
+        wait
+        echo "----------------"
+        counter=$((counter+MAX_PROCESS_COUNT))
     done
-    wait
     for host in $(cat ${IGNORE_HOSTS}); do
 	ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host)
+        ALL_HOSTS_ARRAY=(${ALL_HOSTS})
     done
 }
 
-function clean_all() {
-    for host in ${ALL_HOSTS} ; do 
-        ssh  -o ConnectTimeout=3 $host "rm -rf /tmp/scripts"
-    done
+function clean_script() {
+    host=$1
+    ssh  -o ConnectTimeout=3 $host "rm -rf /tmp/scripts"
 }
 
-
-function call_run_remote_cmd() {
-    for host in ${ALL_HOSTS} ; do 
-	result_file=${RESULT_DIR}/$host.json
-	rm -f ${result_file}
-        ssh  -o ConnectTimeout=3 $host "$@" >> ${result_file} &
-    done
-    wait
+function running_script() {
+    host=$1
+    result_file=${RESULT_DIR}/$host.json
+    rm -f ${result_file}
+    ssh  -o ConnectTimeout=3 $host 'bash /tmp/scripts/run.sh get_json' >> ${result_file} 2>/dev/null
+    [ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
 function usage() {
@@ -88,7 +95,7 @@ function args_parser() {
                     exit
                 fi 
                 if [ ! -f ${HOSTS_FILE} ] ; then
-                    echo "no such file ${HOSTS_FILE}"
+                    echo "load host file failed: ${HOSTS_FILE}: No such file"
                     exit
                 fi
                 ;;
@@ -105,10 +112,10 @@ function main() {
         /bin/bash $BASE_DIR/scripts/run.sh get_json > ${RESULT_DIR}/localhost.json 2>/dev/null
         return 1
     else
-        distribute_all_scripts
+        multi_process_running distribute_script
         echo "开始收集主机信息，请稍等 "
-        call_run_remote_cmd 'bash /tmp/scripts/run.sh get_json' 2>/dev/null
-        clean_all
+        multi_process_running running_script
+        multi_process_running clean_script
     fi
 }
 
