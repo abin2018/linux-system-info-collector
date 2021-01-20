@@ -40,8 +40,8 @@
    ├── run.sh                                 -- 主入口文件  
    └── scripts                                 -- 所有脚本和文件所在的目录  
        ├── apps                                -- 收集RAID信息时需要借助的工具  
-       │   └── MegaCli64
-       ├── functions                        -- 所有功能函数的集合  
+       │   └── MegaCli64  
+       ├── functions                      -- 所有功能函数的集合  
        │   ├── basic.sh                     -- 可以明确的，不依赖于发行版的一些信息，如硬盘、CPU等  
        │   ├── env.sh                        -- 一些变量的配置  
        │   ├── extend.sh                  -- 可能依赖于发行版的一些信息，如RAID、发行版本号等  
