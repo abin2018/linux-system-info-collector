@@ -37,7 +37,7 @@
    ├── log                                       -- 错误日志目录，每次执行会自动生成  
      ├── process_hosts_info.py    -- 处理输出结果的脚本  
    ├── README.md  
-   ├── run.sh                                 -- 主入口文件  
+   ├── run.sh                                 -- 主入口文件    
    └── scripts                                 -- 所有脚本和文件所在的目录  
        ├── apps                                -- 收集RAID信息时需要借助的工具  
        │   └── MegaCli64  
