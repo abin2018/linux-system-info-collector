@@ -41,16 +41,16 @@ function get_server_type() {
 function get_raid_info() {
     #检查当前执行用户是否具有nopasswd的sudo权限
     if ! sudo -l -n 2>/dev/null | grep "User $USER" -A 1 | grep -q 'NOPASSWD'; then
-        echo "$0: sudo nopasswd privileges is needed for raid checking" >&2
+        echo "warning: $0: sudo nopasswd privileges is needed for raid checking" >&2
         return 1
     fi
     #检查是否有raid卡且是LSI产品
     raid_card_info=$(grep 'scsi' /var/log/dmesg | grep -i 'raid')
     if [ -z "${raid_card_info}" ] ; then
-        echo "$0: No raid card found" >&2
+        echo "warning: $0: No raid card found" >&2
         return 2
     elif ! echo ${raid_card_info} | grep -q -i "megaraid" ; then
-        echo "$0: Only Megaraid supported" >&2
+        echo "warning: $0: Only Megaraid supported" >&2
         return 3
     fi
     all_raid_info=$(sudo ${APP_DIR}/MegaCli64 -LdPdInfo -aALL -NoLog)

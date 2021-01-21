@@ -20,7 +20,7 @@ function prepare() {
     ALL_HOSTS_ARRAY=(${ALL_HOSTS})
     ALL_HOSTS_ARRAY_INDEX=0
     HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
-    echo > ${IGNORE_HOSTS}
+    [ -f ${IGNORE_HOSTS} ] && rm -f ${IGNORE_HOSTS}
     [ -d ${RESULT_DIR} ] && rm -rf ${RESULT_DIR}
     mkdir ${RESULT_DIR}
     [ -d ${LOG_DIR} ] && rm -rf ${LOG_DIR}
@@ -31,7 +31,7 @@ function pre_checking() {
     host=$1
     error_info=$(ssh -o PasswordAuthentication=no -o BatchMode=yes -o ConnectTimeout=3 $host exit 2>&1 1>/dev/null)  #检查是否做了互相以及是否可达
     if [ -n "${error_info}" ] ; then
-        echo "$host: $error_info" >&2
+        echo "$host: error: $error_info" >&2
         echo $host >> ${IGNORE_HOSTS}  #将失败的主机写入到一个文件中
     fi
 }
@@ -39,7 +39,6 @@ function pre_checking() {
 function distribute_script() {
     host=$1
     scp -o ConnectTimeout=3 -r $BASE_DIR/scripts $host:/tmp/ &>/dev/null
-    #[ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
 function multi_process_running() {
@@ -73,6 +72,13 @@ function running_script() {
         echo "$host: $error_info" >&2
     fi
     #[ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
+}
+
+function running_result_count() {
+    success_number=${#ALL_HOSTS_ARRAY[@]}
+    fail_number=$(cat ${IGNORE_HOSTS} | wc -l)
+    total_number=$((success_number+fail_number))
+    echo -e "总计:${total_number}\t成功:${success_number}\t失败:${fail_number}\t运行日志:${ERROR_LOG}"
 }
 
 function usage() {
@@ -127,6 +133,9 @@ function main() {
         echo "开始收集主机信息，请稍等 "
         multi_process_running running_script
         multi_process_running clean_script
+        echo "----------------------------------------------------------------"
+        running_result_count
+        echo "----------------------------------------------------------------"
     fi
 }
 
