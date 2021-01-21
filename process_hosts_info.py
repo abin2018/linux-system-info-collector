@@ -27,11 +27,11 @@ def full_field(rows, ilist):
         ilist.append(' '*22)
 
 def output_table(result_dir):
-    out_tag_title = "|%-15s|%-15s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-22s|"
-    out_tag = "|%-15s|%-13s|%-25s|%-20s|%-40s|%-3s|%-6s|%-22s|%-22s|%-22s|"
-    print('-'*199)
+    out_tag_title = "|%-15s|%-24s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-26s|"
+    out_tag = "|%-15s|%-22s|%-25s|%-20s|%-40s|%-3s|%-6s|%-22s|%-22s|%-26s|"
+    print('-'*212)
     print(out_tag_title % ("IP", "厂商", "型号","类型", "操作系统", "CPU", "内存", "网卡", "硬盘", "RAID"))
-    print('-'*199)
+    print('-'*212)
     for file in os.listdir(result_dir):
         host = os.path.splitext(file)[0]
         file_path = os.path.join(result_dir, file)
@@ -51,9 +51,9 @@ def output_table(result_dir):
         line_fix.append(raid_list[0])
         print(out_tag % tuple(line_fix))
         for i in range(1, rows):
-            output_line = [" "*15, " "*13, " "*18, " "*20, " "*40, " "*3, " "*6, net_interface_list[i], disk_list[i], raid_list[i]]
+            output_line = [" "*15, " "*22, " "*18, " "*20, " "*40, " "*3, " "*6, net_interface_list[i], disk_list[i], raid_list[i]]
             print(out_tag % tuple(output_line))
-        print('-'*199)
+        print('-'*212)
 
 
 if __name__ == '__main__':
