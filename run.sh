@@ -21,6 +21,7 @@ function prepare() {
     ALL_HOSTS_ARRAY_INDEX=0
     HOSTS_COUNT=$(cat ${HOSTS_FILE} | wc -l)
     [ -f ${IGNORE_HOSTS} ] && rm -f ${IGNORE_HOSTS}
+    touch ${IGNORE_HOSTS}
     [ -d ${RESULT_DIR} ] && rm -rf ${RESULT_DIR}
     mkdir ${RESULT_DIR}
     [ -d ${LOG_DIR} ] && rm -rf ${LOG_DIR}
@@ -125,7 +126,10 @@ function args_parser() {
 
 function main() {
     if [ -z "${ALL_HOSTS}" ] ; then
-        /bin/bash $BASE_DIR/scripts/run.sh get_json > ${RESULT_DIR}/localhost.json 2>/dev/null
+        error_info=$(/bin/bash $BASE_DIR/scripts/run.sh get_json 2>&1 1>${RESULT_DIR}/localhost.json)
+        if [ -n "${error_info}" ] ; then
+            echo "localhost: $error_info" >> ${ERROR_LOG}
+        fi
         return 1
     else
         multi_process_running pre_checking
