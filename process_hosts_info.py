@@ -11,8 +11,11 @@ OUTPUT_JSON_FILE = os.path.join('/tmp/', 'server_info.json')
 
 def get_host_info_dict(host_info_file):
     info_dict = {}
-    with open(host_info_file) as f:
-        info_dict = json.load(f)
+    try:
+        with open(host_info_file) as f:
+            info_dict = json.load(f)
+    except Exception as e:
+        print(e)
     return info_dict
 
 def output_json(result_dir, out_put_json_file=OUTPUT_JSON_FILE):
