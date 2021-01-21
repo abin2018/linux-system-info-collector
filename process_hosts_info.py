@@ -7,6 +7,7 @@ import sys
 import re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_JSON_FILE = os.path.join('/tmp/', 'server_info.json')
 
 def get_host_info_dict(host_info_file):
     info_dict = {}
@@ -14,14 +15,16 @@ def get_host_info_dict(host_info_file):
         info_dict = json.load(f)
     return info_dict
 
-def output_json(result_dir):
+def output_json(result_dir, out_put_json_file=OUTPUT_JSON_FILE):
     output_list = []
     for file in os.listdir(result_dir):
         host = os.path.splitext(file)[0]
         file_path = os.path.join(result_dir, file)
         info_dict = get_host_info_dict(file_path)
         output_list.append(info_dict)
-    print(json.dumps(output_list, indent=4))
+    with open(out_put_json_file, 'w') as f:
+        json.dump(output_list, f)
+        print("JSON文件已导出到{}".format(out_put_json_file))
 
 def full_field(rows, ilist):
     for i in range((rows - len(ilist))):
