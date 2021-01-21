@@ -11,7 +11,8 @@ source $FUNCTION_DIR/output.sh
 
 # Usage function
 function usage() {
-    echo -e "Usage: bash $0 command
+cat <<eof
+Usage: bash $0 command
 -----------------------------------
 Valid command:
     get_product_info
@@ -22,9 +23,10 @@ Valid command:
     get_memory_info
     get_net_interface_info
     get_disk_info
-	get_raid_info
+    get_raid_info
     get_all
-    get_json"
+    get_json
+eof
 }
 
 
