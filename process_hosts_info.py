@@ -4,6 +4,7 @@
 import os
 import json
 import sys
+import re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,6 +27,14 @@ def full_field(rows, ilist):
     for i in range((rows - len(ilist))):
         ilist.append(' '*22)
 
+def os_info_parser(os_info):
+    if os_info:
+        os_name = os_info.split()[0]
+        version_regex = r'\d+\.\d+\.\d+'
+        version = re.search(version_regex, os_info).group()
+        return os_name+' '+version
+    return os_info
+
 def output_table(result_dir):
     out_tag_title = "|%-15s|%-24s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-26s|"
     out_tag = "|%-15s|%-22s|%-25s|%-20s|%-40s|%-3s|%-6s|%-22s|%-22s|%-26s|"
@@ -36,6 +45,7 @@ def output_table(result_dir):
         host = os.path.splitext(file)[0]
         file_path = os.path.join(result_dir, file)
         info_dict = get_host_info_dict(file_path)
+        info_dict["os_info"] = os_info_parser(info_dict["os_info"])
         info_dict['host'] = host
         line_fix = [info_dict["host"], info_dict["product_info"]["sys_vendor"], info_dict["product_info"]["product_name"],
                              info_dict["server_type"], info_dict["os_info"], info_dict["cpu_info"]["cpu_processor_count"],info_dict["memory_info"]]
