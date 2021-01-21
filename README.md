@@ -13,7 +13,7 @@
 | memory_info        | 内存大小                                            |
 | net_interface_info | 网络信息(主机中以激活的网卡的信息)                  |
 | disk_info          | 磁盘大小信息                                        |
-| raid_info          | 主机(仅物理机)的RAID配置信息(目前仅支持LSI公司产品) |
+| raid_info          | 主机(仅物理机)的RAID配置信息(目前仅支持LSI和Adaptec公司产品) |
 
 ## 一些优势
 
