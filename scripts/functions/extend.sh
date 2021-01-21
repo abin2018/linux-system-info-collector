@@ -66,14 +66,23 @@ function get_raid_info_megaraid() {
     all_vds=$(echo "${all_raid_info}" | grep 'Virtual Drive')
     for vd in ${all_vds} ; do 
         vd_pretty_name=$(echo $vd | awk -F '(' '{print $1}' | awk -F ':' '{print $2}' | tr -d ' ')
-	result=$(echo "${all_raid_info}" | sed -n "/$vd/,/Raw Size.*/p")
-	raid_level=$(echo "$result" | grep "RAID Level" | awk -F':' '{print $2}' | awk -F',' '{print $1}' | awk -F'-' '{print $2}')
-	number_of_drivers=$(echo "$result" | grep "Number Of Drives" | awk -F':' '{print $2}' | tr -d ' ')
-	pd_type=$(echo "$result" | grep "PD Type" | awk -F':' '{print $2}' | tr -d ' ')
-	raw_size_hex=$(echo "$result" | grep "Raw Size" | sed -n 's/.*\(0x.*\) .*/\1/p')
+	    result=$(echo "${all_raid_info}" | sed -n "/$vd/,/Media Type.*/p")
+	    raid_level=$(echo "$result" | grep "RAID Level" | awk -F':' '{print $2}' | awk -F',' '{print $1}' | awk -F'-' '{print $2}')
+	    number_of_drivers=$(echo "$result" | grep "Number Of Drives" | awk -F':' '{print $2}' | tr -d ' ')
+	    pd_disk_interface=$(echo "$result" | grep "PD Type" | awk -F':' '{print $2}' | tr -d ' ')
+	    pd_disk_type_keyword=$(echo "${result}" | grep 'Media Type' | awk -F ':' '{print $2}')
+		if [[ ${pd_disk_type_keyword} == " Hard Disk Device" ]] ; then
+		    pd_disk_type="HDD"
+		elif [[ ${pd_disk_type_keyword} == " Solid State Device" ]] ; then
+		    pd_disk_type="SSD"
+		else
+		    pd_disk_type="UNKNOWN"
+		fi
+		pd_type="${pd_disk_type}-${pd_disk_interface}"
+	    raw_size_hex=$(echo "$result" | grep "Raw Size" | sed -n 's/.*\(0x.*\) .*/\1/p')
         raw_size_dec=$(echo "${raw_size_hex}" | awk '{print strtonum($1)}')
-	raw_size=$(bytes_unit_trans $((raw_size_dec*512)))
-	echo -n "vd${vd_pretty_name}:${number_of_drivers}:${raw_size}:${pd_type}:RAID${raid_level}#"
+	    raw_size=$(bytes_unit_trans $((raw_size_dec*512)))
+	    echo -n "vd${vd_pretty_name}:${number_of_drivers}:${raw_size}:${pd_type}:RAID${raid_level}#"
     done
     echo
     IFS=${OLD_IFS}
@@ -90,7 +99,9 @@ function get_raid_info_adaptec() {
 	    raid_level=$(echo "$result" | grep "RAID level" | awk -F':' '{print $2}' | tr -d ' ')
 		all_segments=$(echo "$result" | grep "Segment")
 		number_of_segments=$(echo "${all_segments}" | wc -l)
-	    pd_type=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $3}' | tr -d ' ')
+	    pd_disk_interface=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $3}' | tr -d ' ')
+	    pd_disk_type=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $4}' | tr -d ' ')
+		pd_type="${pd_disk_type}-${pd_disk_interface}"
 	    raw_size_unit_mb=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $2}' | grep -oE '[0-9]+')
 		raw_size=$(bytes_unit_trans $((raw_size_unit_mb*1024*1024)))
 	    echo -n "ld${ld_pretty_name}:${number_of_segments}:${raw_size}:${pd_type}:RAID${raid_level}#"

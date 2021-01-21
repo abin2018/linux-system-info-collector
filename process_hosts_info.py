@@ -42,11 +42,11 @@ def os_info_parser(os_info):
     return os_info
 
 def output_table(result_dir):
-    out_tag_title = "|%-15s|%-24s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-26s|"
-    out_tag = "|%-15s|%-22s|%-25s|%-20s|%-40s|%-3s|%-6s|%-22s|%-22s|%-26s|"
-    print('-'*212)
+    out_tag_title = "|%-15s|%-24s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-35s|"
+    out_tag = "|%-15s|%-22s|%-25s|%-20s|%-40s|%-3s|%-6s|%-22s|%-22s|%-35s|"
+    print('-'*221)
     print(out_tag_title % ("IP", "厂商", "型号","类型", "操作系统", "CPU", "内存", "网卡", "硬盘", "RAID"))
-    print('-'*212)
+    print('-'*221)
     for file in os.listdir(result_dir):
         host = os.path.splitext(file)[0]
         file_path = os.path.join(result_dir, file)
@@ -69,7 +69,7 @@ def output_table(result_dir):
         for i in range(1, rows):
             output_line = [" "*15, " "*22, " "*18, " "*20, " "*40, " "*3, " "*6, net_interface_list[i], disk_list[i], raid_list[i]]
             print(out_tag % tuple(output_line))
-        print('-'*212)
+        print('-'*221)
 
 
 if __name__ == '__main__':
