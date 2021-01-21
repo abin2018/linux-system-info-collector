@@ -45,14 +45,21 @@ function get_raid_info() {
         return 1
     fi
     #检查是否有raid卡且是LSI产品
-    raid_card_info=$(grep 'scsi' /var/log/dmesg | grep -i 'raid')
+    raid_card_info=$(grep 'raid' /var/log/dmesg)
     if [ -z "${raid_card_info}" ] ; then
         echo "warning: $0: No raid card found" >&2
         return 2
-    elif ! echo ${raid_card_info} | grep -q -i "megaraid" ; then
+    elif echo ${raid_card_info} | grep -q -i "megaraid" ; then
+        get_raid_info_megaraid
+    elif echo ${raid_card_info} | grep -q -i "adaptec" ; then
+        get_raid_info_adaptec
+    else
         echo "warning: $0: Only Megaraid supported" >&2
         return 3
     fi
+}
+
+function get_raid_info_megaraid() {
     all_raid_info=$(sudo ${APP_DIR}/MegaCli64 -LdPdInfo -aALL -NoLog)
     OLD_IFS=$IFS
     IFS=$'\n'
@@ -71,3 +78,24 @@ function get_raid_info() {
     echo
     IFS=${OLD_IFS}
 }
+
+function get_raid_info_adaptec() {
+    all_raid_info=$(sudo ${APP_DIR}/arcconf getconfig 1 LD)
+    OLD_IFS=$IFS
+    IFS=$'\n'
+    all_lds=$(echo "${all_raid_info}" | grep 'Logical Device number')
+    for ld in ${all_lds} ; do 
+        ld_pretty_name=$(echo $ld | awk -F 'Logical Device number' '{print $2}' | tr -d ' ')
+	    result=$(echo "${all_raid_info}" | sed -n "/$ld/,/^$/p")
+	    raid_level=$(echo "$result" | grep "RAID level" | awk -F':' '{print $2}' | tr -d ' ')
+		all_segments=$(echo "$result" | grep "Segment")
+		number_of_segments=$(echo "${all_segments}" | wc -l)
+	    pd_type=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $3}' | tr -d ' ')
+	    raw_size_unit_mb=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $2}' | grep -oE '[0-9]+')
+		raw_size=$(bytes_unit_trans $((raw_size_unit_mb*1024*1024)))
+	    echo -n "ld${ld_pretty_name}:${number_of_segments}:${raw_size}:${pd_type}:RAID${raid_level}#"
+    done
+    echo
+    IFS=${OLD_IFS}
+}
+

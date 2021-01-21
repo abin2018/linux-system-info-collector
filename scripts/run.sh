@@ -22,6 +22,7 @@ Valid command:
     get_memory_info
     get_net_interface_info
     get_disk_info
+	get_raid_info
     get_all
     get_json"
 }
@@ -53,6 +54,9 @@ function main() {
 		    ;;
 	get_disk_info) 
 		    get_disk_info
+		    ;;
+	get_raid_info) 
+		    get_raid_info
 		    ;;
 	get_json) 
 		    output_json
