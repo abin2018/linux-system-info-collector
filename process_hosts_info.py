@@ -15,7 +15,8 @@ def get_host_info_dict(host_info_file):
         with open(host_info_file) as f:
             info_dict = json.load(f)
     except Exception as e:
-        print(e)
+        sys.stderr.write('{}: file {}:{}\n'.format(__file__, host_info_file, e))
+        return
     return info_dict
 
 def output_json(result_dir, out_put_json_file=OUTPUT_JSON_FILE):
@@ -24,6 +25,8 @@ def output_json(result_dir, out_put_json_file=OUTPUT_JSON_FILE):
         host = os.path.splitext(file)[0]
         file_path = os.path.join(result_dir, file)
         info_dict = get_host_info_dict(file_path)
+        if info_dict is None:
+            continue
         output_list.append(info_dict)
     with open(out_put_json_file, 'w') as f:
         json.dump(output_list, f)
@@ -51,6 +54,8 @@ def output_table(result_dir):
         host = os.path.splitext(file)[0]
         file_path = os.path.join(result_dir, file)
         info_dict = get_host_info_dict(file_path)
+        if info_dict is None:
+            continue
         info_dict["os_info"] = os_info_parser(info_dict["os_info"])
         info_dict['host'] = host
         line_fix = [info_dict["host"], info_dict["product_info"]["sys_vendor"], info_dict["product_info"]["product_name"],

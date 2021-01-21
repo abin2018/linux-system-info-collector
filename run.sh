@@ -146,4 +146,4 @@ function main() {
 args_parser "$@"
 prepare
 main
-$PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT}
+$PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} 2>>${ERROR_LOG}
