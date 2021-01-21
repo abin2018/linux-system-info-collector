@@ -27,10 +27,19 @@ function prepare() {
     mkdir ${LOG_DIR}
 }
 
+function pre_checking() {
+    host=$1
+    error_info=$(ssh -o PasswordAuthentication=no -o BatchMode=yes -o ConnectTimeout=3 $host exit 2>&1 1>/dev/null)  #检查是否做了互相以及是否可达
+    if [ -n "${error_info}" ] ; then
+        echo "$host: $error_info" >&2
+        echo $host >> ${IGNORE_HOSTS}  #将失败的主机写入到一个文件中
+    fi
+}
+
 function distribute_script() {
     host=$1
     scp -o ConnectTimeout=3 -r $BASE_DIR/scripts $host:/tmp/ &>/dev/null
-    [ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
+    #[ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
 function multi_process_running() {
@@ -39,7 +48,7 @@ function multi_process_running() {
     while ((counter < ${#ALL_HOSTS_ARRAY[@]})); do
         temp_host_list=($(echo ${ALL_HOSTS_ARRAY[@]:$counter:$MAX_PROCESS_COUNT}))
         for host in ${temp_host_list[@]} ; do 
-            ${exec_function} $host &
+            ${exec_function} $host 2>>${ERROR_LOG} &
         done
         wait
         counter=$((counter+MAX_PROCESS_COUNT))
@@ -59,8 +68,11 @@ function running_script() {
     host=$1
     result_file=${RESULT_DIR}/$host.json
     rm -f ${result_file}
-    ssh  -o ConnectTimeout=3 $host 'bash /tmp/scripts/run.sh get_json' >> ${result_file} 2>/dev/null
-    [ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
+    error_info=$(ssh  -o ConnectTimeout=3 $host 'bash /tmp/scripts/run.sh get_json' 2>&1 1>>${result_file})
+    if [ -n "${error_info}" ] ; then
+        echo "$host: $error_info" >&2
+    fi
+    #[ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
 function usage() {
@@ -110,6 +122,7 @@ function main() {
         /bin/bash $BASE_DIR/scripts/run.sh get_json > ${RESULT_DIR}/localhost.json 2>/dev/null
         return 1
     else
+        multi_process_running pre_checking
         multi_process_running distribute_script
         echo "开始收集主机信息，请稍等 "
         multi_process_running running_script
