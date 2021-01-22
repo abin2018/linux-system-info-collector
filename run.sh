@@ -12,6 +12,7 @@ ERROR_LOG=${LOG_DIR}/running.log
 PYTHON_EXEC=$(which python || which python2 || which python3)  # 设置python解释器
 MAX_PROCESS_COUNT=20 #分发脚本和采集信息时最大允许同时允许的进程数
 PROCESS_COUNT=5 #分发脚本和采集信息时默认的进程数
+SSH_DEFAULT_OPTIONS="-o PasswordAuthentication=no -o BatchMode=yes -o ConnectTimeout=3 -o StrictHostKeyChecking=no"
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then
@@ -30,18 +31,25 @@ function prepare() {
     mkdir ${LOG_DIR}
 }
 
-function pre_checking() {
+function ssh_error_handler() {
     host=$1
-    error_info=$(ssh -o PasswordAuthentication=no -o BatchMode=yes -o ConnectTimeout=3 $host exit 2>&1 1>/dev/null)  #检查是否做了互相以及是否可达
+    error_info=$2
     if [ -n "${error_info}" ] ; then
-        echo "$host: error: $error_info" >&2
+        echo "$host: error: ${error_info}" >&2
         echo $host >> ${IGNORE_HOSTS}  #将失败的主机写入到一个文件中
     fi
 }
 
+function pre_checking() {
+    host=$1
+    error_info=$(ssh ${SSH_DEFAULT_OPTIONS} $host exit 2>&1 1>/dev/null)  #检查是否做了互相以及是否可达
+    ssh_error_handler "$host" "${error_info}"
+}
+
 function distribute_script() {
     host=$1
-    scp -o ConnectTimeout=3 -r $BASE_DIR/scripts $host:/tmp/ &>/dev/null
+    error_info=$(scp ${SSH_DEFAULT_OPTIONS} -r $BASE_DIR/scripts $host:/tmp/ &>/dev/null)
+    ssh_error_handler "$host" "${error_info}"
 }
 
 function multi_process_running() {
@@ -70,11 +78,12 @@ function running_script() {
     host=$1
     result_file=${RESULT_DIR}/$host.json
     rm -f ${result_file}
-    error_info=$(ssh  -o ConnectTimeout=3 $host 'bash /tmp/scripts/run.sh get_json' 2>&1 1>>${result_file})
-    if [ -n "${error_info}" ] ; then
-        echo "$host: $error_info" >&2
+    error_info=$(ssh ${SSH_DEFAULT_OPTIONS} $host 'bash /tmp/scripts/run.sh get_json' 2>&1 1>>${result_file})
+    if ! echo ${error_info} | grep -q 'scripts/run.sh'; then
+        ssh_error_handler "$host" "${error_info}"
+    else
+	echo "$host: ${error_info}" >> ${ERROR_LOG}
     fi
-    #[ $? -ne 0 ] && { echo "$host connect failed: timeout" >> ${ERROR_LOG}; echo $host >> ${IGNORE_HOSTS}; }  #将失败的主机写入到一个文件中
 }
 
 function running_result_count() {

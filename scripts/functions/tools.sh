@@ -1,6 +1,12 @@
 #!/bin/bash
 # Some functions
 
+function logger_writer() {
+	log_level=$1
+	log_content=$2
+	echo "${log_level}: ${log_content}"
+}
+
 function string_splitter() {
 	string=$1
 	delimiter=$2
