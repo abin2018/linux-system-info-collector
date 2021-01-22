@@ -3,13 +3,15 @@
 #General Variables
 BASE_DIR=$(cd $(dirname $0) ; pwd)
 HOSTS_FILE=""
+SPECIFY_HOST_FILE=${BASE_DIR}/.tmp_hosts
 RESULT_DIR=$BASE_DIR/.result
 IGNORE_HOSTS=$BASE_DIR/.ignore_hosts
 OUTPUT_FORMAT="table"
 LOG_DIR=$BASE_DIR/log
 ERROR_LOG=${LOG_DIR}/running.log
 PYTHON_EXEC=$(which python || which python2 || which python3)  # 设置python解释器
-MAX_PROCESS_COUNT=5 #分发脚本和采集信息时最大允许同时允许的进程数
+MAX_PROCESS_COUNT=20 #分发脚本和采集信息时最大允许同时允许的进程数
+PROCESS_COUNT=5 #分发脚本和采集信息时默认的进程数
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then
@@ -46,12 +48,12 @@ function multi_process_running() {
     exec_function=$1
     local counter=0
     while ((counter < ${#ALL_HOSTS_ARRAY[@]})); do
-        temp_host_list=($(echo ${ALL_HOSTS_ARRAY[@]:$counter:$MAX_PROCESS_COUNT}))
+        temp_host_list=($(echo ${ALL_HOSTS_ARRAY[@]:$counter:$PROCESS_COUNT}))
         for host in ${temp_host_list[@]} ; do 
             ${exec_function} $host 2>>${ERROR_LOG} &
         done
         wait
-        counter=$((counter+MAX_PROCESS_COUNT))
+        counter=$((counter+PROCESS_COUNT))
     done
     for host in $(cat ${IGNORE_HOSTS}); do
 	ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host)
@@ -88,11 +90,17 @@ Usage: $0 [OPTION] [FILE]
 options
   -f format                  set the output format, valid option is 'json' or 'table', default is 'table'
   -h hostfile                a text file that contains all hosts
+  -s host                    specify a single host
+  -c process_count           specify a process running 
 eof
 }
 
 function args_parser() {
-    while getopts ":f:h:" opt ; do
+    if [[ $1 == '?' ]] ; then
+        usage
+	exit
+    fi
+    while getopts ":f:h:s:c:" opt ; do
         case $opt in 
             f)
                 OUTPUT_FORMAT=$OPTARG
@@ -116,12 +124,46 @@ function args_parser() {
                     exit
                 fi
                 ;;
+            s) 
+                SPECIFY_HOSTS=$OPTARG
+                if echo ${HOSTS_FILE} | grep -q '^-.*' ; then
+                    usage
+                    exit
+                fi 
+		echo ${SPECIFY_HOSTS}> ${SPECIFY_HOST_FILE}
+		HOSTS_FILE=${SPECIFY_HOST_FILE}
+                ;;
+            c) 
+                _PROCESS_COUNT=$OPTARG
+                if echo ${HOSTS_FILE} | grep -q '^-.*' ; then
+                    usage
+                    exit
+                fi 
+                if [[ ! ${_PROCESS_COUNT} =~ ^[0-9]+$ ]] ; then
+                    echo "MAX_PROCESS_COUNT should be a positive number"
+                    exit
+	        elif ((_PROCESS_COUNT > MAX_PROCESS_COUNT)) ; then
+		    echo "PROCESS_COUNT should be less than ${MAX_PROCESS_COUNT}"
+		    exit
+	        else
+                    PROCESS_COUNT=${_PROCESS_COUNT}
+                fi
+                ;;
             ?)
                 usage
                 exit
          esac
     done
 
+}
+
+function python_output() {
+    if [ -n "$PYTHON_EXEC" ] ; then
+        $PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} 2>>${ERROR_LOG}
+    else
+        echo "No python found, output failed"
+	return 1
+    fi
 }
 
 function main() {
@@ -146,4 +188,4 @@ function main() {
 args_parser "$@"
 prepare
 main
-$PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} 2>>${ERROR_LOG}
+python_output
