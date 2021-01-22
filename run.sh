@@ -149,7 +149,7 @@ function args_parser() {
                     exit
                 fi 
                 if [[ ! ${_PROCESS_COUNT} =~ ^[0-9]+$ ]] ; then
-                    echo "MAX_PROCESS_COUNT should be a positive number"
+                    echo "PROCESS_COUNT should be a positive number"
                     exit
 	        elif ((_PROCESS_COUNT > MAX_PROCESS_COUNT)) ; then
 		    echo "PROCESS_COUNT should be less than ${MAX_PROCESS_COUNT}"
