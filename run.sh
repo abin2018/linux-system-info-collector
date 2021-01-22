@@ -95,12 +95,12 @@ function running_result_count() {
 
 function usage() {
     cat <<eof
-Usage: $0 [OPTION] [FILE]
+Usage: $0 [ARGS] [OPTION]
 options
   -f format                  set the output format, valid option is 'json' or 'table', default is 'table'
-  -h hostfile                a text file that contains all hosts
+  -h hostfile                specify a text file that contains all hosts
   -s host                    specify a single host
-  -c process_count           specify a process running 
+  -c process_count           specify the process number running at the same time
 eof
 }
 
@@ -168,7 +168,7 @@ function args_parser() {
 
 function python_output() {
     if [ -n "$PYTHON_EXEC" ] ; then
-        $PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} 2>>${ERROR_LOG}
+        $PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} ${HOSTS_FILE} 2>>${ERROR_LOG}
     else
         echo "No python found, output failed"
 	return 1

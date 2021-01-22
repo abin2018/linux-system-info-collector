@@ -19,12 +19,16 @@ def get_host_info_dict(host_info_file):
         return
     return info_dict
 
-def output_json(result_dir, out_put_json_file=OUTPUT_JSON_FILE):
+def output_json(result_dir, hosts_list, out_put_json_file=OUTPUT_JSON_FILE):
     output_list = []
-    for file in os.listdir(result_dir):
-        host = os.path.splitext(file)[0]
-        file_path = os.path.join(result_dir, file)
+    json_file_list = [ f for f in os.listdir(result_dir) ]
+    for host in hosts_list:
+        json_file = "{}.json".format(host)
+        if json_file not in json_file_list:
+            continue
+        file_path = os.path.join(result_dir, json_file)
         info_dict = get_host_info_dict(file_path)
+        info_dict['host'] = host
         if info_dict is None:
             continue
         output_list.append(info_dict)
@@ -44,15 +48,18 @@ def os_info_parser(os_info):
         return os_name+' '+version
     return os_info
 
-def output_table(result_dir):
+def output_table(result_dir, hosts_list):
     out_tag_title = "|%-15s|%-24s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-35s|"
     out_tag = "|%-15s|%-22s|%-25s|%-20s|%-40s|%-3s|%-6s|%-22s|%-22s|%-35s|"
     print('-'*221)
     print(out_tag_title % ("IP", "厂商", "型号","类型", "操作系统", "CPU", "内存", "网卡", "硬盘", "RAID"))
     print('-'*221)
-    for file in os.listdir(result_dir):
-        host = os.path.splitext(file)[0]
-        file_path = os.path.join(result_dir, file)
+    json_file_list = [ f for f in os.listdir(result_dir) ]
+    for host in hosts_list:
+        json_file = "{}.json".format(host)
+        if json_file not in json_file_list:
+            continue
+        file_path = os.path.join(result_dir, json_file)
         info_dict = get_host_info_dict(file_path)
         if info_dict is None:
             continue
@@ -83,8 +90,17 @@ if __name__ == '__main__':
     except Exception:
         print("Usage: {} output_format".format(__file__))
         sys.exit()
+    try:
+        hosts_file = sys.argv[2]
+        if '.empty' in hosts_file:
+            hosts_list = ['localhost']
+        else:
+            with open(hosts_file) as f:
+                hosts_list = [ line.strip() for line in f.readlines() ]
+    except Exception:
+        hosts_list = ['localhost']
     result_dir = os.path.join(BASE_DIR, '.result')
     if output_format == 'json':
-        output_json(result_dir)
+        output_json(result_dir, hosts_list)
     else:
-        output_table(result_dir)
+        output_table(result_dir, hosts_list)
