@@ -30,9 +30,9 @@ function get_cpu_info() {
 function get_memory_info() {
     total_mem=0;
     for mem in /sys/devices/system/memory/memory*; do
-	if [[ "$(cat ${mem}/online)" == "1" ]] ; then
-	    total_mem=$((total_mem+$((0x$(cat /sys/devices/system/memory/block_size_bytes)))));
-	fi
+    if [[ "$(cat ${mem}/online)" == "1" ]] ; then
+        total_mem=$((total_mem+$((0x$(cat /sys/devices/system/memory/block_size_bytes)))));
+    fi
     done
     echo $(bytes_unit_trans $total_mem)
 }
@@ -41,16 +41,16 @@ function get_memory_info() {
 function get_disk_info() {
     all_disks=$(ls /sys/block/ | grep -o -E "${DISK_INCLUDE_PATTERN}")
     for disk in ${all_disks} ; do
-	disk_type_tag=$(cat /sys/block/$disk/queue/rotational)
-	disk_sectors=$(cat /sys/block/$disk/size)
-	disk_sector_size=$(cat /sys/block/$disk/queue/hw_sector_size)
-	if [[ ${disk_type_tag} == "1" ]] ; then
-	    disk_type="SATA"
-	else
-	    disk_type="SSD"
-	fi
-	disk_size=$(bytes_unit_trans $((${disk_sectors}*${disk_sector_size})))
-	echo -n "$disk:${disk_size}:${disk_type}#"
+    disk_type_tag=$(cat /sys/block/$disk/queue/rotational)
+    disk_sectors=$(cat /sys/block/$disk/size)
+    disk_sector_size=$(cat /sys/block/$disk/queue/hw_sector_size)
+    if [[ ${disk_type_tag} == "1" ]] ; then
+        disk_type="SATA"
+    else
+        disk_type="SSD"
+    fi
+    disk_size=$(bytes_unit_trans $((${disk_sectors}*${disk_sector_size})))
+    echo -n "$disk:${disk_size}:${disk_type}#"
     done
     echo
 }
@@ -58,12 +58,12 @@ function get_disk_info() {
 # Check Network
 function get_net_interface_info() {
     for interface in $(ls /sys/class/net/ | xargs -n 1 | grep -Ev "${NET_EXCLUDE_PATTERN}") ; do 
-	carrier_file=/sys/class/net/$interface/carrier
-	if [[ -f ${carrier_file} ]] && [[ $(cat ${carrier_file} 2>/dev/null) -eq 1 ]]; then
-	    speed=$(cat /sys/class/net/$interface/speed 2>/dev/null)
-	    [ -z "$speed" ] && speed="--"
-	    echo -n "$interface:${speed}Mb/s#"
-	fi
+    carrier_file=/sys/class/net/$interface/carrier
+    if [[ -f ${carrier_file} ]] && [[ $(cat ${carrier_file} 2>/dev/null) -eq 1 ]]; then
+        speed=$(cat /sys/class/net/$interface/speed 2>/dev/null)
+        [ -z "$speed" ] && speed="--"
+        echo -n "$interface:${speed}Mb/s#"
+    fi
     done
     echo
 }

@@ -28,21 +28,21 @@ function output_json() {
     net_interface_info=($(string_splitter $(get_net_interface_info)))
     echo -n "    \"net_interface_info\": ["
     for net in ${net_interface_info[@]}; do
-	net_info=($(string_splitter "$net" ":"))
-	if [[ ${arr_element_counter} -eq ${#net_interface_info[@]} ]] ; then
-	    echo -n "
+    net_info=($(string_splitter "$net" ":"))
+    if [[ ${arr_element_counter} -eq ${#net_interface_info[@]} ]] ; then
+        echo -n "
         {
             \"interface_name\": \"${net_info[0]}\", 
             \"interface_speed\": \"${net_info[1]}\"
         }"
-	else
-	    echo -n "
+    else
+        echo -n "
         {
             \"interface_name\": \"${net_info[0]}\", 
             \"interface_speed\": \"${net_info[1]}\"
         }, "
-	fi
-	((arr_element_counter++))
+    fi
+    ((arr_element_counter++))
     done
     echo "
     ],"
@@ -50,23 +50,23 @@ function output_json() {
     disk_info=($(string_splitter $(get_disk_info)))
     echo -n "    \"disk_info\": ["
     for disk in ${disk_info[@]}; do
-	disk_info_single=($(string_splitter "$disk" ":"))
-	if [[ ${arr_element_counter} -eq ${#disk_info[@]} ]] ; then
-	    echo -n "
+    disk_info_single=($(string_splitter "$disk" ":"))
+    if [[ ${arr_element_counter} -eq ${#disk_info[@]} ]] ; then
+        echo -n "
         {
             \"disk_name\": \"${disk_info_single[0]}\", 
             \"disk_size\": \"${disk_info_single[1]}\", 
             \"disk_type\": \"${disk_info_single[2]}\"
         }"
-	else
-	    echo -n "
+    else
+        echo -n "
         {
             \"disk_name\": \"${disk_info_single[0]}\", 
             \"disk_size\": \"${disk_info_single[1]}\", 
             \"disk_type\": \"${disk_info_single[2]}\"
         }, "
         fi
-	((arr_element_counter++))
+    ((arr_element_counter++))
     done
     echo "
     ],"
@@ -74,17 +74,17 @@ function output_json() {
     raid_info=($(string_splitter $(get_raid_info)))
     echo -n "    \"raid_info\": ["
     for raid in ${raid_info[@]}; do
-	raid_info_single=($(string_splitter "$raid" ":"))
-	if [[ ${arr_element_counter} -eq ${#raid_info[@]} ]] ; then
-	    echo -n "
+    raid_info_single=($(string_splitter "$raid" ":"))
+    if [[ ${arr_element_counter} -eq ${#raid_info[@]} ]] ; then
+        echo -n "
         {
             \"vd_name\": \"${raid_info_single[0]}\", 
             \"number_of_drivers\": \"${raid_info_single[1]}\", 
             \"raw_size\": \"${raid_info_single[2]}\", 
             \"pd_type\": \"${raid_info_single[3]}\", 
             \"raid_level\": \"${raid_info_single[4]}\"}"
-	else
-	    echo -n "
+    else
+        echo -n "
         {
             \"vd_name\": \"${raid_info_single[0]}\", 
             \"number_of_drivers\": \"${raid_info_single[1]}\", 
@@ -93,7 +93,7 @@ function output_json() {
             \"raid_level\": \"${raid_info_single[4]}\"
         },"
         fi
-	((arr_element_counter++))
+    ((arr_element_counter++))
     done
     echo "
     ]"

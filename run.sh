@@ -64,7 +64,7 @@ function multi_process_running() {
         counter=$((counter+PROCESS_COUNT))
     done
     for host in $(cat ${IGNORE_HOSTS}); do
-	ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host)
+    ALL_HOSTS=$(echo "${ALL_HOSTS}" | grep -v $host)
         ALL_HOSTS_ARRAY=(${ALL_HOSTS})
     done
 }
@@ -82,7 +82,7 @@ function running_script() {
     if ! echo ${error_info} | grep -q 'scripts/run.sh'; then
         ssh_error_handler "$host" "${error_info}"
     else
-	echo "$host: ${error_info}" >> ${ERROR_LOG}
+    echo "$host: ${error_info}" >> ${ERROR_LOG}
     fi
 }
 
@@ -97,6 +97,7 @@ function usage() {
     cat <<eof
 Usage: $0 [ARGS] [OPTION]
 options
+   ?                         show this help
   -f format                  set the output format, valid option is 'json' or 'table', default is 'table'
   -h hostfile                specify a text file that contains all hosts
   -s host                    specify a single host
@@ -107,7 +108,7 @@ eof
 function args_parser() {
     if [[ $1 == '?' ]] ; then
         usage
-	exit
+    exit
     fi
     while getopts ":f:h:s:c:" opt ; do
         case $opt in 
@@ -139,8 +140,8 @@ function args_parser() {
                     usage
                     exit
                 fi 
-		echo ${SPECIFY_HOSTS}> ${SPECIFY_HOST_FILE}
-		HOSTS_FILE=${SPECIFY_HOST_FILE}
+        echo ${SPECIFY_HOSTS}> ${SPECIFY_HOST_FILE}
+        HOSTS_FILE=${SPECIFY_HOST_FILE}
                 ;;
             c) 
                 _PROCESS_COUNT=$OPTARG
@@ -151,10 +152,10 @@ function args_parser() {
                 if [[ ! ${_PROCESS_COUNT} =~ ^[0-9]+$ ]] ; then
                     echo "PROCESS_COUNT should be a positive number"
                     exit
-	        elif ((_PROCESS_COUNT > MAX_PROCESS_COUNT)) ; then
-		    echo "PROCESS_COUNT should be less than ${MAX_PROCESS_COUNT}"
-		    exit
-	        else
+            elif ((_PROCESS_COUNT > MAX_PROCESS_COUNT)) ; then
+            echo "PROCESS_COUNT should be less than ${MAX_PROCESS_COUNT}"
+            exit
+            else
                     PROCESS_COUNT=${_PROCESS_COUNT}
                 fi
                 ;;
@@ -171,7 +172,7 @@ function python_output() {
         $PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} ${HOSTS_FILE} 2>>${ERROR_LOG}
     else
         echo "No python found, output failed"
-	return 1
+    return 1
     fi
 }
 
