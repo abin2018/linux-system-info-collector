@@ -41,12 +41,13 @@ def full_field(rows, ilist):
         ilist.append(' '*22)
 
 def os_info_parser(os_info):
-    if os_info:
+    try:
         os_name = os_info.split()[0]
-        version_regex = r'\d+\.\d+(\.\d+)?'
+        version_regex = r'\d+(\.\d+)?(\.\d+)?'
         version = re.search(version_regex, os_info).group()
-        return os_name+' '+version
-    return os_info
+    except Exception:
+        return os_info
+    return os_name+' '+version
 
 def output_table(result_dir, hosts_list):
     out_tag_title = "|%-15s|%-24s|%-27s|%-22s|%-44s|%s|%-8s|%-24s|%-24s|%-35s|"

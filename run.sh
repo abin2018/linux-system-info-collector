@@ -137,7 +137,6 @@ function args_parser() {
                     echo "load host file failed: ${HOSTS_FILE}: No such file"
                     exit
                 fi
-                hosts_file_option=true
                 ;;
             s) 
                 SPECIFY_HOSTS=$OPTARG
@@ -145,11 +144,6 @@ function args_parser() {
                     usage
                     exit
                 fi 
-                #处理-h和-s的冲突
-                if ${hosts_file_option} ; then
-                    echo "warning: you both specify the -h and -s option, but only -h works"
-                    return 1
-                fi
                 echo ${SPECIFY_HOSTS}> ${SPECIFY_HOST_FILE}
                 HOSTS_FILE=${SPECIFY_HOST_FILE}
                 ;;
