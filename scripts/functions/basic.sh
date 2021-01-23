@@ -51,7 +51,7 @@ function get_disk_info() {
     disk_sectors=$(cat /sys/block/$disk/size)
     disk_sector_size=$(cat /sys/block/$disk/queue/hw_sector_size)
     if [[ ${disk_type_tag} == "1" ]] ; then
-        disk_type="SATA"
+        disk_type="HDD"
     else
         disk_type="SSD"
     fi
