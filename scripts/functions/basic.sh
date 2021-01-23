@@ -7,8 +7,8 @@ function get_product_info() {
     if ! $(nopasswd_sudo_checker); then
         logger_writer "warning" "sudo nopasswd privileges is needed for product serial and product_uuid" >&2
     else
-        product_serial=$(cat /sys/class/dmi/id/product_serial)
-        product_uuid=$(cat /sys/class/dmi/id/product_uuid)
+        product_serial=$(sudo cat /sys/class/dmi/id/product_serial)
+        product_uuid=$(sudo cat /sys/class/dmi/id/product_uuid)
     fi
     echo "${sys_vendor}"#"${product_name}"#"${product_serial}"#"${product_uuid}"
 }

@@ -9,10 +9,12 @@ IGNORE_HOSTS=$BASE_DIR/.ignore_hosts
 OUTPUT_FORMAT="table"
 LOG_DIR=$BASE_DIR/log
 ERROR_LOG=${LOG_DIR}/running.log
-PYTHON_EXEC=$(which python || which python2 || which python3)  # 设置python解释器
+PYTHON_EXEC=$(which python 2>/dev/null || which python2 2>/dev/null \
+	      || which python3 2>/dev/null)  # 设置python解释器
 MAX_PROCESS_COUNT=20 #分发脚本和采集信息时最大允许同时允许的进程数
 PROCESS_COUNT=5 #分发脚本和采集信息时默认的进程数
-SSH_DEFAULT_OPTIONS="-o PasswordAuthentication=no -o BatchMode=yes -o ConnectTimeout=3 -o StrictHostKeyChecking=no"
+SSH_DEFAULT_OPTIONS="-o PasswordAuthentication=no -o BatchMode=yes \
+	             -o ConnectTimeout=3 -o StrictHostKeyChecking=no"
 
 function prepare() {
     if [ -z "${HOSTS_FILE}" ] ; then

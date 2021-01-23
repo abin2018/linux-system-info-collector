@@ -3,7 +3,7 @@
 
 function nopasswd_sudo_checker() {
     if [ $UID -ne 0 ] ; then
-        if sudo -l -n 2>/dev/null | grep "User $USER" -A 1 | grep -q 'NOPASSWD'; then
+        if sudo -n echo test 2>/dev/null | grep -q 'test'; then
            echo true
         else
            echo false

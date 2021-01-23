@@ -44,7 +44,7 @@ function get_raid_info() {
         return 1
     fi
     #检查是否有raid卡且是LSI产品
-    raid_card_info=$(grep 'raid' /var/log/dmesg)
+    raid_card_info=$($APP_DIR/lspci | grep 'RAID')
     if [ -z "${raid_card_info}" ] ; then
         logger_writer "warning" "No raid card found" >&2
         return 2

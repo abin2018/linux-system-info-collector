@@ -43,7 +43,7 @@ def full_field(rows, ilist):
 def os_info_parser(os_info):
     if os_info:
         os_name = os_info.split()[0]
-        version_regex = r'\d+\.\d+\.\d+'
+        version_regex = r'\d+\.\d+(\.\d+)?'
         version = re.search(version_regex, os_info).group()
         return os_name+' '+version
     return os_info
