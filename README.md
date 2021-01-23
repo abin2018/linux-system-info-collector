@@ -32,24 +32,22 @@
 
 1. 各文件说明
 
-   .
-   ├── log                                      -- 错误日志目录，每次执行会自动生成
-   ├── process_hosts_info.py    -- 处理输出结果的脚本
-   ├── README.md                     -- 帮助文档
-   ├── run.sh                                 -- 主入口文件
-   └── scripts                                 -- 所有脚本和文件所在的目录
-       ├── apps                                -- 收集RAID信息时需要借助的工具
-       │   └── MegaCli64                 -- LSI RAID卡工具
-
-   ​    │   └── arcconf                       -- Adaptec RAID卡工具
-
-   ​    ├── functions                        -- 所有功能函数的集合
-   ​    │   ├── basic.sh                     -- 可以明确的，不依赖于发行版的一些信息，如硬盘、CPU等
-   ​    │   ├── env.sh                        -- 一些变量的配置
-   ​    │   ├── extend.sh                  -- 可能依赖于发行版的一些信息，如RAID、发行版本号等
-   ​    │   ├── output.sh                  -- run.sh执行结果的输出，输出为json格式
-   ​    │   └── tools.sh                     -- 一些如单位转换等的工具函数 
-   ​    └── run.sh                             -- 收集脚本的入口文件
+   .  
+   ├── log                                      -- 错误日志目录，每次执行会自动生成  
+   ├── process_hosts_info.py    -- 处理输出结果的脚本  
+   ├── README.md                     -- 帮助文档  
+   ├── run.sh                                 -- 主入口文件  
+   └── scripts                                 -- 所有脚本和文件所在的目录  
+       ├── apps                                -- 收集RAID信息时需要借助的工具  
+       │   └── MegaCli64                 -- LSI RAID卡工具  
+   ​   │   └── arcconf                       -- Adaptec RAID卡工具  
+   ​    ├── functions                        -- 所有功能函数的集合  
+   ​    │   ├── basic.sh                     -- 可以明确的，不依赖于发行版的一些信息，如硬盘、CPU等  
+   ​    │   ├── env.sh                        -- 一些变量的配置  
+   ​    │   ├── extend.sh                  -- 可能依赖于发行版的一些信息，如RAID、发行版本号等  
+   ​    │   ├── output.sh                  -- run.sh执行结果的输出，输出为json格式  
+   ​    │   └── tools.sh                     -- 一些如单位转换等的工具函数   
+   ​    └── run.sh                             -- 收集脚本的入口文件  
 
 2. 用法
 
