@@ -79,10 +79,12 @@ function running_script() {
     result_file=${RESULT_DIR}/$host.json
     rm -f ${result_file}
     error_info=$(ssh ${SSH_DEFAULT_OPTIONS} $host 'bash /tmp/scripts/run.sh get_json' 2>&1 1>>${result_file})
-    if ! echo ${error_info} | grep -q 'scripts/run.sh'; then
+    if ! echo ${error_info} | grep -q '.*#$'; then
         ssh_error_handler "$host" "${error_info}"
     else
-    echo "$host: ${error_info}" >> ${ERROR_LOG}
+        echo "${error_info}" | while read info ; do
+            echo "$host: $(echo $info | tr -d '#')" >> ${ERROR_LOG}
+        done
     fi
 }
 
@@ -140,8 +142,8 @@ function args_parser() {
                     usage
                     exit
                 fi 
-        echo ${SPECIFY_HOSTS}> ${SPECIFY_HOST_FILE}
-        HOSTS_FILE=${SPECIFY_HOST_FILE}
+                echo ${SPECIFY_HOSTS}> ${SPECIFY_HOST_FILE}
+                HOSTS_FILE=${SPECIFY_HOST_FILE}
                 ;;
             c) 
                 _PROCESS_COUNT=$OPTARG
@@ -152,10 +154,10 @@ function args_parser() {
                 if [[ ! ${_PROCESS_COUNT} =~ ^[0-9]+$ ]] ; then
                     echo "PROCESS_COUNT should be a positive number"
                     exit
-            elif ((_PROCESS_COUNT > MAX_PROCESS_COUNT)) ; then
-            echo "PROCESS_COUNT should be less than ${MAX_PROCESS_COUNT}"
-            exit
-            else
+                elif ((_PROCESS_COUNT > MAX_PROCESS_COUNT)) ; then
+                    echo "PROCESS_COUNT should be less than ${MAX_PROCESS_COUNT}"
+                    exit
+                else
                     PROCESS_COUNT=${_PROCESS_COUNT}
                 fi
                 ;;
@@ -164,7 +166,6 @@ function args_parser() {
                 exit
          esac
     done
-
 }
 
 function python_output() {
@@ -172,7 +173,7 @@ function python_output() {
         $PYTHON_EXEC $BASE_DIR/process_hosts_info.py ${OUTPUT_FORMAT} ${HOSTS_FILE} 2>>${ERROR_LOG}
     else
         echo "No python found, output failed"
-    return 1
+        return 1
     fi
 }
 
@@ -180,7 +181,9 @@ function main() {
     if [ -z "${ALL_HOSTS}" ] ; then
         error_info=$(/bin/bash $BASE_DIR/scripts/run.sh get_json 2>&1 1>${RESULT_DIR}/localhost.json)
         if [ -n "${error_info}" ] ; then
-            echo "localhost: $error_info" >> ${ERROR_LOG}
+            echo "${error_info}" | while read info ; do
+                echo "localhost: $(echo $info | tr -d '#')" >> ${ERROR_LOG}
+            done
         fi
         return 1
     else

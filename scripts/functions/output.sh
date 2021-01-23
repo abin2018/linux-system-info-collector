@@ -7,7 +7,9 @@ function output_json() {
     product_info=($(string_splitter "$(get_product_info)"))
     echo "    \"product_info\": {
         \"sys_vendor\": \"${product_info[0]}\", 
-        \"product_name\": \"${product_info[1]}\"
+        \"product_name\": \"${product_info[1]}\",
+        \"product_serial\": \"${product_info[2]}\",
+        \"product_uuid\": \"${product_info[3]}\"
     },"
     server_type=$(get_server_type)
     echo "    \"server_type\": \"${server_type}\","

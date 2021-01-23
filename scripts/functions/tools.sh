@@ -1,10 +1,23 @@
 #!/bin/bash
 # Some functions
 
+function nopasswd_sudo_checker() {
+    if [ $UID -ne 0 ] ; then
+        if sudo -l -n 2>/dev/null | grep "User $USER" -A 1 | grep -q 'NOPASSWD'; then
+           echo true
+        else
+           echo false
+        fi
+    else
+        echo true
+    fi
+}
+
 function logger_writer() {
     log_level=$1
     log_content=$2
-    echo "${log_level}: ${log_content}"
+    source_tag="#"
+    echo "${log_level}: ${log_content}${source_tag}"
 }
 
 function string_splitter() {

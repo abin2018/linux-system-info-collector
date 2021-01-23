@@ -39,24 +39,21 @@ function get_server_type() {
 
 # Check Raid Info
 function get_raid_info() {
-    if [ $UID -ne 0 ] ; then
-        #检查当前执行用户是否具有nopasswd的sudo权限
-        if ! sudo -l -n 2>/dev/null | grep "User $USER" -A 1 | grep -q 'NOPASSWD'; then
-           logger_writer "warning" "<$0> <$FUNCNAME> <$LINENO> <sudo nopasswd privileges is needed for raid checking>" >&2
-           return 1
-        fi
+    if ! $(nopasswd_sudo_checker); then
+        logger_writer "warning" "sudo nopasswd privileges is needed for raid checking" >&2
+        return 1
     fi
     #检查是否有raid卡且是LSI产品
     raid_card_info=$(grep 'raid' /var/log/dmesg)
     if [ -z "${raid_card_info}" ] ; then
-        logger_writer "warning" "<$0> <$FUNCNAME> <$LINENO> <No raid card found>" >&2
+        logger_writer "warning" "No raid card found" >&2
         return 2
     elif echo ${raid_card_info} | grep -q -i "megaraid" ; then
         get_raid_info_megaraid
     elif echo ${raid_card_info} | grep -q -i "adaptec" ; then
         get_raid_info_adaptec
     else
-        logger_writer "warning" "<$0> <$FUNCNAME> <$LINENO> <Only Megaraid supported>" >&2
+        logger_writer "warning" "Raid card not be supported" >&2
         return 3
     fi
 }

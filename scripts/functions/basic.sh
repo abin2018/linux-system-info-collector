@@ -8,7 +8,13 @@
 function get_product_info() {
     sys_vendor=$(cat /sys/class/dmi/id/sys_vendor | tr ' ' '-')
     product_name=$(cat /sys/class/dmi/id/product_name | tr ' ' '-')
-    echo "${sys_vendor}"#"${product_name}"
+    if ! $(nopasswd_sudo_checker); then
+        logger_writer "warning" "sudo nopasswd privileges is needed for product serial and product_uuid" >&2
+    else
+        product_serial=$(cat /sys/class/dmi/id/product_serial)
+        product_uuid=$(cat /sys/class/dmi/id/product_uuid)
+    fi
+    echo "${sys_vendor}"#"${product_name}"#"${product_serial}"#"${product_uuid}"
 }
 
 # Check Kernel Info
