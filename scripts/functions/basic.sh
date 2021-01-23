@@ -1,8 +1,4 @@
 #!/bin/bash
-# Date: 2021-01-04
-# Author: Eric
-# Email: yanghigh@163.com
-# Version: 1.0
 
 # Check Vendor and Product Name
 function get_product_info() {
