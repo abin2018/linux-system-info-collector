@@ -32,8 +32,8 @@ function string_splitter() {
 function bytes_unit_trans() {
     size=$1
     if awk -W version  2>/dev/null | grep -q 'mawk' ; then
-        echo "$size" | awk -f ${APP_DIR}/trans_mawk.awk
+        echo "$size" | awk -f ${BASE_DIR}/functions/trans_mawk.awk
     else
-        echo "$size" | awk -f ${APP_DIR}/trans_gawk.awk
+        echo "$size" | awk -f ${BASE_DIR}/functions/trans_gawk.awk
     fi
 }
