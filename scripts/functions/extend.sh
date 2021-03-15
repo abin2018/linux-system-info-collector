@@ -110,7 +110,13 @@ function get_raid_info_adaptec() {
         pd_type="${pd_disk_type}-${pd_disk_interface}"
         raw_size_unit_mb=$(echo "${all_segments}" | head -1 | awk -F'[(,]' '{print $2}' | grep -oE '[0-9]+')
         raw_size=$(bytes_unit_trans $((raw_size_unit_mb*1024*1024)))
-        echo -n "ld${ld_pretty_name}:${number_of_segments}:${raw_size}:${pd_type}:RAID${raid_level}#"
+        write_cache_policy=$(echo "${result}" | grep -i 'write-cache status' | awk -F':' '{print $2}' | tr -d ' ')
+        if echo ${write_cache_policy} | grep -qi 'off'; then
+            write_cache_policy="Write_Cache_Off"
+        else
+            write_cache_policy="Write_Cache_On"
+        fi
+        echo -n "ld${ld_pretty_name}:${number_of_segments}:${raw_size}:${pd_type}:RAID${raid_level}:${write_cache_policy}#"
     done
     echo
     IFS=${OLD_IFS}
