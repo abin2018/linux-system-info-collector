@@ -264,6 +264,7 @@ function python_output() {
 function main() {
     if [ -z "${ALL_HOSTS}" ] ; then
         error_info=$(/bin/bash $BASE_DIR/scripts/run.sh get_json 2>&1 1>${RESULT_DIR}/localhost.json)
+        sudo rm -f /data/io_test_file && sudo rm -f /tmp/io_test_file
         if [ -n "${error_info}" ] ; then
             echo "${error_info}" | while read info ; do
                 echo "localhost: $(echo $info | tr -d '#')" >> ${ERROR_LOG}
