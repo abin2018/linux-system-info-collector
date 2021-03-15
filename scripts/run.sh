@@ -8,6 +8,7 @@ source $FUNCTION_DIR/tools.sh
 source $FUNCTION_DIR/extend.sh
 source $FUNCTION_DIR/basic.sh
 source $FUNCTION_DIR/output.sh
+source $FUNCTION_DIR/perf.sh
 
 # Usage function
 function usage() {
@@ -24,11 +25,11 @@ Valid command:
     get_net_interface_info
     get_disk_info
     get_raid_info
+    get_io_test
     get_all
     get_json
 eof
 }
-
 
 # Main function
 function main() {
@@ -63,6 +64,9 @@ function main() {
     get_json) 
             output_json
             ;;
+    get_io_test) 
+            get_io_test
+            ;;
     get_all) 
             get_product_info
             get_kernel_info
@@ -72,6 +76,7 @@ function main() {
             get_memory_info
             get_net_interface_info
             get_disk_info
+            get_io_test
             ;;
     *) 
             usage

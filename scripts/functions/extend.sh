@@ -43,7 +43,8 @@ function get_raid_info() {
         logger_writer "warning" "sudo nopasswd privileges is needed for raid checking" >&2
         return 1
     fi
-    #检查是否有raid卡且是LSI产品
+
+    #检查是否有raid卡且是否为支持的RAID卡产品
     raid_card_info=$($APP_DIR/lspci | grep 'RAID')
     if [ -z "${raid_card_info}" ] ; then
         logger_writer "warning" "No raid card found" >&2
@@ -70,6 +71,12 @@ function get_raid_info_megaraid() {
         number_of_drivers=$(echo "$result" | grep "Number Of Drives" | awk -F':' '{print $2}' | tr -d ' ')
         pd_disk_interface=$(echo "$result" | grep "PD Type" | awk -F':' '{print $2}' | tr -d ' ')
         pd_disk_type_keyword=$(echo "${result}" | grep 'Media Type' | awk -F ':' '{print $2}')
+        write_cache_policy=$(echo "${result}" | grep 'Current Cache Policy' | awk -F',' '{print $4}')
+        if echo ${write_cache_policy} | grep -qi 'No Write Cache'; then
+            write_cache_policy="No_Write_Cache"
+        else
+            write_cache_policy="Write_Cache_OK"
+        fi
         if [[ ${pd_disk_type_keyword} == " Hard Disk Device" ]] ; then
             pd_disk_type="HDD"
         elif [[ ${pd_disk_type_keyword} == " Solid State Device" ]] ; then
@@ -81,7 +88,7 @@ function get_raid_info_megaraid() {
         raw_size_hex=$(echo "$result" | grep "Raw Size" | sed -n 's/.*\(0x.*\) .*/\1/p')
         raw_size_dec=$(echo "${raw_size_hex}" | awk '{print strtonum($1)}')
         raw_size=$(bytes_unit_trans $((raw_size_dec*512)))
-        echo -n "vd${vd_pretty_name}:${number_of_drivers}:${raw_size}:${pd_type}:RAID${raid_level}#"
+        echo -n "vd${vd_pretty_name}:${number_of_drivers}:${raw_size}:${pd_type}:RAID${raid_level}:${write_cache_policy}#"
     done
     echo
     IFS=${OLD_IFS}

@@ -84,7 +84,9 @@ function output_json() {
             \"number_of_drivers\": \"${raid_info_single[1]}\", 
             \"raw_size\": \"${raid_info_single[2]}\", 
             \"pd_type\": \"${raid_info_single[3]}\", 
-            \"raid_level\": \"${raid_info_single[4]}\"}"
+            \"raid_level\": \"${raid_info_single[4]}\",
+            \"write_cache_policy\": \"${raid_info_single[5]}\"
+        }"
     else
         echo -n "
         {
@@ -92,14 +94,38 @@ function output_json() {
             \"number_of_drivers\": \"${raid_info_single[1]}\", 
             \"raw_size\": \"${raid_info_single[2]}\", 
             \"pd_type\": \"${raid_info_single[3]}\", 
-            \"raid_level\": \"${raid_info_single[4]}\"
+            \"raid_level\": \"${raid_info_single[4]}\",
+            \"write_cache_policy\": \"${raid_info_single[5]}\"
+        },"
+        fi
+    ((arr_element_counter++))
+    done
+    echo "
+    ],"
+    arr_element_counter=1
+    io_test_info=($(string_splitter $(get_io_test)))
+    echo -n "    \"io_test_info\": ["
+    for io_info in ${io_test_info[@]}; do
+	io_test_single=($(string_splitter "${io_info}" ":"))
+    if [[ ${arr_element_counter} -eq ${#io_test_info[@]} ]] ; then
+        echo -n "
+        {
+            \"dir\": \"${io_test_single[0]}\", 
+            \"read\": \"${io_test_single[1]}\", 
+            \"write\": \"${io_test_single[2]}\" 
+        }"
+    else
+        echo -n "
+        {
+            \"dir\": \"${io_test_single[0]}\", 
+            \"read\": \"${io_test_single[1]}\", 
+            \"write\": \"${io_test_single[2]}\"
         },"
         fi
     ((arr_element_counter++))
     done
     echo "
     ]"
-    arr_element_counter=1
     echo "}"
 }
 
