@@ -26,7 +26,7 @@ function get_dist_info() {
 }
 
 # Check Server Type
-function get_server_type() {
+function get_server_type_by_sdv() {
     virtual_check_result=$(systemd-detect-virt)
     if [[ ${virtual_check_result} == "none" ]] ; then
         echo "Physical"
@@ -34,6 +34,29 @@ function get_server_type() {
         echo "Docker"
     else
         echo "Virtual(${virtual_check_result})"
+    fi
+}
+
+function get_server_type_by_dmidecode() {
+    system-manufacturer=$(dmidecode -s system-manufacturer | grep -v '^#')
+    if echo ${system-manufacturer} | grep -Ei 'vmware|alibaba|innotek GmbH|qemu'; then
+        echo "Virtual(${system-manufacturer})"
+    else
+        echo "Physical"
+    fi
+}
+
+function get_server_ty() {
+    which systemd-detect-virt >/dev/null 2>&1
+    systemd_detect_virt_check=$?
+    which dmidecode
+    dmidecode_chedck=$?
+    if ((systemd_detect_virt_check == 0)); then
+        get_server_type_by_sdv()
+    elif ((dmidecode_chedck == 0)); then
+        get_server_type_by_dmidecode
+    else
+        echo "Unknown"
     fi
 }
 
