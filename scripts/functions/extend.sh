@@ -38,8 +38,8 @@ function get_server_type_by_sdv() {
 }
 
 function get_server_type_by_dmidecode() {
-    system-manufacturer=$(dmidecode -s system-manufacturer | grep -v '^#')
-    if echo ${system-manufacturer} | grep -Ei 'vmware|alibaba|innotek GmbH|qemu'; then
+    system_manufacturer=$(dmidecode -s system-manufacturer | grep -v '^#')
+    if echo ${system_manufacturer} | grep -qEi 'vmware|alibaba|innotek GmbH|qemu'; then
         echo "Virtual(${system-manufacturer})"
     else
         echo "Physical"
@@ -49,11 +49,11 @@ function get_server_type_by_dmidecode() {
 function get_server_type() {
     which systemd-detect-virt >/dev/null 2>&1
     systemd_detect_virt_check=$?
-    which dmidecode
-    dmidecode_chedck=$?
+    which dmidecode >/dev/null 2>&1
+    dmidecode_check=$?
     if ((systemd_detect_virt_check == 0)); then
-        get_server_type_by_sdv()
-    elif ((dmidecode_chedck == 0)); then
+        get_server_type_by_sdv
+    elif ((dmidecode_check == 0)); then
         get_server_type_by_dmidecode
     else
         echo "Unknown"
