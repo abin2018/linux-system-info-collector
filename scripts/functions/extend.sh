@@ -46,7 +46,7 @@ function get_server_type_by_dmidecode() {
     fi
 }
 
-function get_server_ty() {
+function get_server_type() {
     which systemd-detect-virt >/dev/null 2>&1
     systemd_detect_virt_check=$?
     which dmidecode
